@@ -1,10 +1,13 @@
 #lang racket
-;Testing graph
+;Testing lists
 (define graph '(
                 (A (B C E F))
                 (B (C D))
                 (C (D E F))
                 (D ())
+                ))
+(define wlist '(((A E) (3))
+                ((B C) (4))
                 ))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -92,5 +95,39 @@
         )))
 ;Testing
 (pathFinder '(A B C) graph)
+
+;//////////////////////////////////////// S E C O N D  C O M M I T ///////////////////////////////////////////////
+
+(define (listCreator list1 element)
+  (listCreatorAux (reverse list1) (cons element '())))
+
+(define (listCreatorAux list1 list2)
+  (cond ((empty? list1) list2)
+        (else (listCreatorAux (cdr list1) (cons (car list1) list2)))))
+;(listCreator '(A B C D) 'E)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (pathCreator start end graph)
+  (pathCreatorAux start end graph '())
+  )
+(define (pathCreatorAux start end tryList newGraph)
+  (cond((empty? tryList) newGraph)
+       ((equal? start (caar tryList)) (indexer start end tryList newGraph))
+       (else
+        (pathCreatorAux start end (cdr tryList) (cons (car tryList) newGraph) )
+        )
+       ))
+(define (indexer start end tryList newGraph)
+  (cond((list? (car tryList))
+        (pathCreatorAux start end (cdr tryList) (cons (cons start (listCreator (cdar tryList) end)) newGraph))
+        )
+       (else
+        (pathCreatorAux start end (cdr tryList) (cons (list start (list end) ) newGraph) )
+        )
+       )
+  )
+;Testing
+(pathCreator 'D 'A graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
