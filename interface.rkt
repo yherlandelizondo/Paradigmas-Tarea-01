@@ -1,5 +1,6 @@
 #lang racket
 (require racket/gui/base)
+(require "testLogic.rkt")
 
 #|
     ////////////////////////////
@@ -36,7 +37,9 @@
                           [label "Agregar nodo"]))
 
 (define addNodeButton (new button% [parent leftPanel]
-                           [label "Agregar"]))
+                           [label "Agregar"]
+                           [callback (lambda (button event)
+                                       (newNodeButtonCallback event))]))
 
 (define originNode (new text-field% [parent leftPanel]
                         [label "Origen"]))
@@ -44,11 +47,16 @@
 (define destinationNode (new text-field% [parent leftPanel]
                              [label "Destino"]))
 
+(define pathWeight (new text-field% [parent leftPanel]
+                        [label "Distancia"]))
+
 (define bidirectionalCheckbox (new check-box% [parent leftPanel]
                                    [label "Bidireccional"]))
 
 (define addEdgeButton (new button% [parent leftPanel]
-                           [label "Agregar"]))
+                           [label "Agregar"]
+                           [callback (lambda (button event)
+                                       (newEdgeButtonCallback event))]))
 
 (define searchMessage (new message% [parent leftPanel]
                            [label "Buscar ruta"]))
@@ -62,6 +70,15 @@
 (define routeSearchButton (new button% [parent leftPanel]
                                [label "Buscar"]))
 
+#|
+    Data collection section
+|#
+
+(define (newNodeButtonCallback event)
+  (displayNewNode (send newNodeField get-value)))
+
+(define (newEdgeButtonCallback event)
+  (displayEdge (send originNode get-value) (send destinationNode get-value) (send pathWeight get-value) (send bidirectionalCheckbox get-value)))
 #|
     canvas section
 |#
