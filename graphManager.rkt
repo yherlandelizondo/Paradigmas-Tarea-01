@@ -82,29 +82,35 @@
        ))
 ;Testing
 ;(lastElement '(A))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define (pathFinder start graph)
-  (pathfinder-aux start graph (paths (lastElement start) graph) '() '() )
-  )
-(define (pathfinder-aux start graph linkZone newElement linkDone)
-  (cond((empty? linkZone) (reverse linkDone))
-       (else
-        (pathfinder-aux start graph (cdr linkZone) newElement
-                        (cons (reverse (cons (lastElement (car linkZone)) (reverse start) )) linkDone) )
-        )))
-;Testing
-(pathFinder '(A B C) graph)
-
 ;//////////////////////////////////////// S E C O N D  C O M M I T ///////////////////////////////////////////////
 
-(define (listCreator list1 element)
-  (listCreatorAux (reverse list1) (cons element '())))
+(define (graphCreator graph newNode)
+  (cond((empty? newNode) graph)
+       (else
+        (reverse (cons (list newNode '()) (reverse graph) ))
+        )
+       ))
+;Testing
+(graphCreator graph 'E)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (listCreatorAux list1 list2)
-  (cond ((empty? list1) list2)
-        (else (listCreatorAux (cdr list1) (cons (car list1) list2)))))
-;(listCreator '(A B C D) 'E)
+(define (weightIndex start end weight wlist)
+  (reverse (cons (list (list start end) weight) (reverse wlist)))
+  )
+;Testing
+;(weightIndex 'A 'D 45 wlist)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Returns a list with the order reversed
+(define (Mreverse list)
+  (reverse-aux list '()))
+(define (reverse-aux list newList)
+  (cond((empty? list) newList)
+       (else
+        (reverse-aux (cdr list) (cons (car list) newList))
+        )
+       ))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (pathCreator start end graph)
@@ -112,22 +118,22 @@
   )
 (define (pathCreatorAux start end tryList newGraph)
   (cond((empty? tryList) newGraph)
+       ;;;;A == A
        ((equal? start (caar tryList)) (indexer start end tryList newGraph))
-       (else
+       (else ;; aplico cdr
         (pathCreatorAux start end (cdr tryList) (cons (car tryList) newGraph) )
         )
        ))
 (define (indexer start end tryList newGraph)
-  (cond((list? (car tryList))
-        (pathCreatorAux start end (cdr tryList) (cons (cons start (listCreator (cdar tryList) end)) newGraph))
+  (cond((null? (cadar tryList))
+        (pathCreatorAux start end (cdr tryList) (cons (list start (cons end (cadar tryList)) ) newGraph))
         )
        (else
-        (pathCreatorAux start end (cdr tryList) (cons (list start (list end) ) newGraph) )
+        (pathCreatorAux start end (cdr tryList) (cons (list start (cons end (cadar tryList))) newGraph))
         )
        )
   )
 ;Testing
-(pathCreator 'D 'A graph)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+;(pathCreator 'A 'E graph)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
