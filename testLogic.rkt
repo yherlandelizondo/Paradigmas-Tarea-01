@@ -10,6 +10,10 @@
 (provide displayNewNode displayEdge)
 
 #|
+  ////////////////////////////////////////////////////////////////////////////////
+|#
+
+#|
   Function to write data to a .txt file
 |#
 (define (writeFile graph edges)
@@ -29,6 +33,10 @@
   (close-output-port output-port))
 
 #|
+  ////////////////////////////////////////////////////////////////////////////////
+|#
+
+#|
   Function for reading data from a file
 |#
 (define (readFile)
@@ -39,8 +47,9 @@
   |#
   (close-input-port (open-input-file "./tmp/temp.txt")) (read (open-input-file "./tmp/temp.txt")))
 
-
-
+#|
+  ////////////////////////////////////////////////////////////////////////////////
+|#
 
 #|
   testing
