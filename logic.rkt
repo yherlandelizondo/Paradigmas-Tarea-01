@@ -1,13 +1,6 @@
 #lang racket
 ;*************************************************************************************************
-(define (val node pairs)
-    (cond ((null? pairs) '())
-    ((equal? node (caar pairs))(cons (caar pairs) (cdar pairs)))
-    (else (val node (cdr pairs)))))
-(define (Associations node list)
-    (val node list))
-;*************************************************************************************************
-(define grafo  '( (a (e))
+(define graph  '( (a (e))
               (e (a b g))
               (b (e g f d))
               (c (d))
@@ -31,52 +24,70 @@
               ((c d) (5))
               ((d c) (5))))
 ;*************************************************************************************************
-(define (miembro? elem list)
+(define (values node pairs)
+    (cond ((null? pairs) '())
+    ((equal? node (caar pairs))(cons (caar pairs) (cdar pairs)))
+    (else (values node (cdr pairs)))))
+(define (associations node list)
+    (values node list))
+;************************************************************************************************
+;Viene siendo el map
+(define (applyFunction function list)
+  (cond ((null? list)'())
+  (else (cons (function (car list)) (applyFunction function (cdr list))))))
+;(display(ApplyFunction (lambda (x) (* x x)) '(1 2 3 4 5)))
+
+;*************************************************************************************************
+(define (member? element list)
   (cond((null? list)#f)
-       ((equal? elem (car list))#t)
-       (else(miembro? elem (cdr list)))))
+       ((equal? element (car list))#t)
+       (else(member? element (cdr list)))))
 
-(define (solucion? fin ruta)
-  (equal? fin (car ruta)))
+(define (resolution? end route)
+  (equal? end (car route)))
 
-(define (vecinos ele grafo)
-    (cond ((equal? (Associations ele grafo) #f)
+(define (neighbors element graph); vecinos
+    (cond ((equal? (associations element graph) #f)
            #f)
-          (else(cadr (Associations ele grafo)))))
+          (else(cadr (associations element graph)))))
 
-(define (extender ruta grafo)
+(define (extender ruta graph)
   (apply append
-         (map (lambda(x)
-                    (cond ((miembro? x ruta) '())
+         (applyFunction (lambda(x)
+                    (cond ((member? x ruta) '())
                           (else (list (cons x ruta)))))
-              (vecinos (car ruta) grafo))))
+              (neighbors (car ruta) graph))))
 
-(define (anchura-todas-aux rutas fin grafo total)
+(define (widthFirstAux rutas end graph total)
   (cond ((null? rutas)
-         (map reverse total))
-        ((solucion? fin (car rutas))
-         (anchura-todas-aux (cdr rutas) fin grafo (cons (car rutas) total)))
+         (applyFunction reverse total))
+        ((resolution? end (car rutas))
+         (widthFirstAux (cdr rutas) end graph (cons (car rutas) total)))
         ( else
-          (anchura-todas-aux (append
-           (cdr rutas)(extender (car rutas) grafo)) fin grafo total))))
+          (widthFirstAux (append
+           (cdr rutas)(extender (car rutas) graph)) end graph total))))
 
-(define (anchura-todas ini fin grafo)
-  (anchura-todas-aux (list (list ini)) fin grafo '()))
+(define (widthFirst first end graph)
+  (widthFirstAux (list (list first)) end graph '()))
 ;*************************************************************************************************
-(define (longitud list)
+(define (lengthList list)
   (cond ((null? list)0)
-  (else (+ 1 (longitud (cdr list))))))
+  (else (+ 1 (lengthList (cdr list))))))
 ;*************************************************************************************************
-(define (Weight listWeights route)
-  (cond ((equal? (longitud route) 1)0)
-    (else (+ (caadr (Associations (list (car route) (cadr route)) listWeights)) (Weight listWeights (cdr route))))))
+(define (weight listWeights route)
+  (cond ((equal? (lengthList route) 1)0)
+    (else (+ (caadr (associations (list (car route) (cadr route)) listWeights)) (weight listWeights (cdr route))))))
 ;*************************************************************************************************
-(define (CompareWeight listWeights routes)
+(define (compareWeight listWeights routes)
   (cond ((null? routes) 1000000)
-  (else (min (Weight listWeights (car routes)) (CompareWeight listWeights (cdr routes))))))
+  (else (min (weight listWeights (car routes)) (compareWeight listWeights (cdr routes))))))
 ;*************************************************************************************************
-(define (FindMin routes allRoutes listWeights)
-  (cond((equal? (Weight listWeights (car routes)) (CompareWeight listWeights allRoutes)) (car routes))
-    (else (FindMin (cdr routes) allRoutes listWeights))))
+(define (findMinAux routes allRoutes listWeights)
+  (cond((equal? (weight listWeights (car routes)) (compareWeight listWeights allRoutes)) (car routes))
+    (else (findMinAux (cdr routes) allRoutes listWeights))))
+(define(findMin routes listWeights)
+(findMinAux routes routes listWeights))
 
-(displayln (FindMin (anchura-todas 'a 'b grafo) (anchura-todas 'a 'b grafo) listWeights))
+
+
+(displayln (findMin (widthFirst 'a 'f graph) listWeights))
