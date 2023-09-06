@@ -240,7 +240,7 @@
   (close-output-port output-port))
 
 #|
-  ////////////////////////////////////////////////////////////////////////////////
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 |#
 
 #|
@@ -256,14 +256,39 @@
   (define file-content (read input-port))
   (close-input-port input-port)
   file-content)
+
 #|
-  ////////////////////////////////////////////////////////////////////////////////
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 |#
+
 (define (addNode node)
-  (writeFile (graphCreator (car(readFile)) (string->symbol node)) (cadr (readFile))))
+  (writeFile (graphCreator (car (readFile)) (string->symbol node)) (cadr (readFile))))
+
+#|
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+|#
+
+(define (addEdge origin destination weight bid)
+
+  #|
+  bidirectional checkbox marked
+|#
+  (cond ((equal? bid #t) (writeFile (pathCreator (string->symbol origin) (string->symbol destination) (car (readFile)))
+                                    (weightIndex (string->symbol origin) (string->symbol destination) (string->number weight) (cadr (readFile))))
+
+                         (writeFile (pathCreator (string->symbol destination) (string->symbol origin) (car (readFile)))
+                                    (weightIndex (string->symbol destination) (string->symbol origin) (string->number weight) (cadr (readFile)))))
+        #|
+  bidirectional checkbox not marked
+|#
+        (else (writeFile (pathCreator (string->symbol origin) (string->symbol destination) (car (readFile)))
+                         (weightIndex (string->symbol origin) (string->symbol destination) (string->number weight) (cadr (readFile)))))))
+#|
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+|#
 
 (define (reset)
   (writeFile '() '()))
 
-(provide addNode reset)
+(provide addNode reset addEdge)
 

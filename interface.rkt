@@ -90,10 +90,13 @@
 
 
 (define (newEdgeButtonCallback event)
-  (display "hola"))
+  (addEdge (send originNode get-value) (send destinationNode get-value)
+           (send pathWeight get-value) (send bidirectionalCheckbox get-value)))
 
 (define (resetButtonCallback even)
   (reset))
+
+
 #|
     canvas section
 |#
