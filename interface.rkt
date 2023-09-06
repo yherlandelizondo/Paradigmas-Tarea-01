@@ -1,6 +1,6 @@
 #lang racket
 (require racket/gui/base)
-(require "testLogic.rkt")
+(require "logic.rkt")
 
 #|
     ////////////////////////////
@@ -27,6 +27,8 @@
                         [min-height 300]
                         ))
 
+
+
 #|
     ////////////////////////////
     graph construction section
@@ -36,10 +38,18 @@
 (define newNodeField (new text-field% [parent leftPanel]
                           [label "Agregar nodo"]))
 
-(define addNodeButton (new button% [parent leftPanel]
+(define buttonPanel (new horizontal-panel% [parent leftPanel]
+                         [min-width 300]))
+
+(define addNodeButton (new button% [parent buttonPanel]
                            [label "Agregar"]
                            [callback (lambda (button event)
                                        (newNodeButtonCallback event))]))
+
+(define resetButton (new button% [parent buttonPanel]
+                         [label "Reset"]
+                         [callback (lambda (button event)
+                                     (resetButtonCallback event))]))
 
 (define originNode (new text-field% [parent leftPanel]
                         [label "Origen"]))
@@ -75,10 +85,15 @@
 |#
 
 (define (newNodeButtonCallback event)
-  (displayNewNode (send newNodeField get-value)))
+  (addNode (send newNodeField get-value)))
+
+
 
 (define (newEdgeButtonCallback event)
-  (displayEdge (send originNode get-value) (send destinationNode get-value) (send pathWeight get-value) (send bidirectionalCheckbox get-value)))
+  (display "hola"))
+
+(define (resetButtonCallback even)
+  (reset))
 #|
     canvas section
 |#
