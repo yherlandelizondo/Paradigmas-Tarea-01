@@ -77,8 +77,10 @@
 (define searchDestination (new text-field% [parent leftPanel]
                                [label "Destino"]))
 
-(define routeSearchButton (new button% [parent leftPanel]
-                               [label "Buscar"]))
+(define searchButton (new button% [parent leftPanel]
+                          [label "Buscar"]
+                          [callback (lambda (button event)
+                                      (searchButtonCallback event))]))
 
 #|
     Data collection section
@@ -95,6 +97,9 @@
 
 (define (resetButtonCallback even)
   (reset))
+
+(define (searchButtonCallback event)
+  (search (send searchOrigin get-value) (send destinationNode get-value)))
 
 
 #|

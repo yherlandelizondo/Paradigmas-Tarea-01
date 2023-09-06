@@ -290,5 +290,8 @@
 (define (reset)
   (writeFile '() '()))
 
-(provide addNode reset addEdge)
+(define (search origin destination)
+  display "hola")
+
+(provide addNode reset addEdge search)
 
