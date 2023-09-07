@@ -28,7 +28,6 @@
                         ))
 
 
-
 #|
     ////////////////////////////
     graph construction section
@@ -89,8 +88,6 @@
 (define (newNodeButtonCallback event)
   (addNode (send newNodeField get-value)))
 
-
-
 (define (newEdgeButtonCallback event)
   (addEdge (send originNode get-value) (send destinationNode get-value)
            (send pathWeight get-value) (send bidirectionalCheckbox get-value)))
@@ -102,6 +99,88 @@
   ;(addNode (send searchDestination get-value)))
   (search (send searchOrigin get-value) (send searchDestination get-value)))
 
+
+#|
+    ////////////////////////////
+    Read and write section
+    ////////////////////////////
+|#
+#|
+  Function to write data to a .txt file
+|#
+(define (writeFile graph edges)
+  #|
+    create the .txt file; if exist, replace it.
+  |#
+  (define output-port (open-output-file "./tmp/temp.txt" #:exists 'replace))
+
+  #|
+    adding the file content
+  |#
+  (write (list graph edges) output-port)
+
+  #|
+    close the file
+  |#
+  (close-output-port output-port))
+
+#|
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+|#
+
+#|
+  Function for reading data from a file
+|#
+(define (readFile)
+  #|
+    (open-input-file "./tmp/temp.txt") -> store the file descriptor (number to refer to an open file in the OS)
+    (read (open-input-file "./tmp/temp.txt")) -> read the file, using the file descriptor
+    (close-input-port (open-input-file "./tmp/temp.txt")) -> close the open file
+  |#
+  (define input-port (open-input-file "./tmp/temp.txt"))
+  (define file-content (read input-port))
+  (close-input-port input-port)
+  file-content)
+
+#|
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+|#
+
+(define (addNode node)
+  (writeFile (graphCreator (car (readFile)) (string->symbol node)) (cadr (readFile))))
+
+#|
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+|#
+
+(define (addEdge origin destination weight bid)
+
+  #|
+  bidirectional checkbox marked
+|#
+  (cond ((equal? bid #t) (writeFile (pathCreator (string->symbol origin) (string->symbol destination) (car (readFile)))
+                                    (weightIndex (string->symbol origin) (string->symbol destination) (string->number weight) (cadr (readFile))))
+
+                         (writeFile (pathCreator (string->symbol destination) (string->symbol origin) (car (readFile)))
+                                    (weightIndex (string->symbol destination) (string->symbol origin) (string->number weight) (cadr (readFile)))))
+        #|
+  bidirectional checkbox not marked
+|#
+        (else (writeFile (pathCreator (string->symbol origin) (string->symbol destination) (car (readFile)))
+                         (weightIndex (string->symbol origin) (string->symbol destination) (string->number weight) (cadr (readFile)))))))
+#|
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+|#
+
+(define (reset)
+  (writeFile '() '()))
+
+(define (search origin destination)
+  ;(writeFile (string->symbol origin) (string->symbol destination)))
+  (writeFile '()
+             (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile)))
+             )
+  )
 
 #|
     canvas section

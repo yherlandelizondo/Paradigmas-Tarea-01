@@ -1,1 +1,1 @@
-(((a (b)) (b (a))) (((a b) 25) ((b a) 25)))
+(((cartago (heredia)) (heredia (cartago)) (alajuela (cartago heredia))) (((cartago heredia) (40)) ((heredia cartago) (40)) ((alajuela heredia) (50)) ((alajuela cartago) (25))))
