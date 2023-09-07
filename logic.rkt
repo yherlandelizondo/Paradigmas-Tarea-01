@@ -291,7 +291,11 @@
   (writeFile '() '()))
 
 (define (search origin destination)
-  display "hola")
+  ;(writeFile (string->symbol origin) (string->symbol destination)))
+  (writeFile '()
+             (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile)))
+             )
+  )
 
 (provide addNode reset addEdge search)
 
