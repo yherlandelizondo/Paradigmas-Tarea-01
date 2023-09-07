@@ -1,1 +1,1 @@
-(((cartago (heredia)) (heredia (cartago)) (alajuela (cartago heredia))) (((cartago heredia) (40)) ((heredia cartago) (40)) ((alajuela heredia) (50)) ((alajuela cartago) (25))))
+(((alajuela (usa)) (usa (alajuela))) (((usa alajuela) 100) ((alajuela usa) 100)))

@@ -100,7 +100,6 @@
 |#
 
 
-
 ;The node exist in the graph?
 (define (exist node graph)
   (cond((null? graph) #f)
@@ -216,11 +215,7 @@
 ;(pathCreator 'A 'E graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#|
-  ////////////////////////////////////////////////////////////////////////////////
-|#
 
-;test
 
-;(provide addNode reset addEdge search)
+(provide pathCreator weightIndex widthFirst graphCreator)
 
