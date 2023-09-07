@@ -99,7 +99,8 @@
   (reset))
 
 (define (searchButtonCallback event)
-  (search (send searchOrigin get-value) (send destinationNode get-value)))
+  ;(addNode (send searchDestination get-value)))
+  (search (send searchOrigin get-value) (send searchDestination get-value)))
 
 
 #|
