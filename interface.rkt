@@ -82,7 +82,9 @@
                                       (searchButtonCallback event))]))
 
 #|
+    ////////////////////////////
     Data collection section
+    ////////////////////////////
 |#
 
 (define (newNodeButtonCallback event)
@@ -106,17 +108,25 @@
     ////////////////////////////
 |#
 #|
-  Function to write data to a .txt file
+    ////////////////////////////
+    Function to write data to a .txt file
+    ////////////////////////////
 |#
 (define (writeFile graph edges)
   #|
-    create the .txt file; if exist, replace it.
-  |#
-  (define output-port (open-output-file "./tmp/temp.txt" #:exists 'replace))
+    ////////////////////////////
+    creates the .txt file (if exist, replace it.)
+    ////////////////////////////
+|#
 
+  (define output-port (open-output-file "./tmp/temp.txt" #:exists 'replace))
   #|
+    ////////////////////////////
     adding the file content
-  |#
+    ////////////////////////////
+|#
+
+
   (write (list graph edges) output-port)
 
   #|
@@ -125,11 +135,9 @@
   (close-output-port output-port))
 
 #|
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-|#
-
-#|
-  Function for reading data from a file
+    ////////////////////////////
+    Function for reading data from a file
+    ////////////////////////////
 |#
 (define (readFile)
   #|
@@ -143,15 +151,13 @@
   file-content)
 
 #|
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ////////////////////////////
+    Communication with the .txt file section
+    ////////////////////////////
 |#
 
 (define (addNode node)
   (writeFile (graphCreator (car (readFile)) (string->symbol node)) (cadr (readFile))))
-
-#|
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-|#
 
 (define (addEdge origin destination weight bid)
 
@@ -168,10 +174,12 @@
 |#
         (else (writeFile (pathCreator (string->symbol origin) (string->symbol destination) (car (readFile)))
                          (weightIndex (string->symbol origin) (string->symbol destination) (string->number weight) (cadr (readFile)))))))
-#|
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-|#
 
+#|
+    ////////////////////////////
+    Reset and search for shortest parth section
+    ////////////////////////////
+|#
 (define (reset)
   (writeFile '() '()))
 
@@ -181,14 +189,15 @@
              (findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile))) (cadr (readFile)))
              )
   )
-;(widthFirst (string->symbol origin) (string->symbol destination) (car (readFile)))
-;(findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile))) (cdr (readFile)))
 #|
+    ////////////////////////////
     canvas section
+    ////////////////////////////
 |#
 (define canvas (new canvas% [parent rightPanel]))
-
 #|
+    ////////////////////////////
     show the frame
+    ////////////////////////////
 |#
 (send mainWindow show #t)
