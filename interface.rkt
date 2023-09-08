@@ -177,11 +177,12 @@
 
 (define (search origin destination)
   ;(writeFile (string->symbol origin) (string->symbol destination)))
-  (writeFile '()
-             (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile)))
+  (writeFile (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile)))
+             (findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile))) (cadr (readFile)))
              )
   )
-
+;(widthFirst (string->symbol origin) (string->symbol destination) (car (readFile)))
+;(findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile))) (cdr (readFile)))
 #|
     canvas section
 |#
