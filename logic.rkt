@@ -25,6 +25,7 @@
                       ((b d) (4))
                       ((c d) (5))
                       ((d c) (5))))
+
 ;*************************************************************************************************
 (define (values node pairs)
   (cond ((null? pairs) '())
@@ -93,7 +94,6 @@
 
 
 ;(displayln (findMin (widthFirst 'a 'f graph) listWeights))
-
 
 #|
   ///////////////////////////////parte nacho///////////////////////////////////////
@@ -173,10 +173,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (weightIndex start end weight wlist)
-  (reverse (cons (list (list start end) weight) (reverse wlist)))
+  (weightIndexAux start end weight wlist '())
+  )
+
+(define (weightIndexAux start end weight wlist blank)
+  (reverse (cons (list (list start end) (cons weight blank)) (reverse wlist)))
   )
 ;Testing
-;(weightIndex 'A 'D 45 wlist)
+;(weightIndex 'A 'D 45 listWeights)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Returns a list with the order reversed
@@ -219,5 +223,5 @@
 
 
 
-(provide pathCreator weightIndex widthFirst graphCreator)
+(provide pathCreator weightIndex widthFirst graphCreator findMin)
 
