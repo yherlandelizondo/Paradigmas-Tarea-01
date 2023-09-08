@@ -1,1 +1,1 @@
-(((alajuela (usa)) (usa (alajuela))) (((usa alajuela) 100) ((alajuela usa) 100)))
+(((a c d b) (a c b) (a b)) (a b))

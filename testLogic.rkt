@@ -26,15 +26,6 @@
                       ((d c) (5))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (displayNewNode node)
-  (displayln (format "Nodo recibido: ~a" node)))
-
-
-(define (displayEdge firstNode secondNode weight bid)
-  (displayln (format "Nodo A: ~a Nodo B: ~a Peso: ~a Bidireccional: ~a" firstNode secondNode weight bid)))
-
-(provide displayNewNode displayEdge)
-
 
 #|
   testing
@@ -107,3 +98,31 @@
 ;(listMake graph)
 
 (provide listWeights graph)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Return the index of a specific member of the list
+(define (getIndexAux value list cont)
+  (cond((equal? (car list) value) cont)
+       (else
+        (getIndexAux value (cdr list) (+ cont 1)))
+       ))
+
+(define (getIndex value list)
+  (getIndexAux value list 0))
+
+;testing (getIndex 'a '(e i h e a))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;return the index value in the list
+(define (getValueWithIndexAux index list cont)
+  (cond((equal? cont index) (car list))
+       (else
+        (getValueWithIndexAux index (cdr list) (+ cont 1)))
+       ))
+
+(define (getValueWithIndex index list)
+  (getValueWithIndexAux index list 0))
+
+;testing
+;(getValueWithIndex '2 '(b c e k a))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
