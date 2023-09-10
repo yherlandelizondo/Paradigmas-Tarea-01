@@ -40,12 +40,12 @@
 (define buttonPanel (new horizontal-panel% [parent leftPanel]
                          [min-width 300]))
 
-(define addNodeButton (new button% [parent buttonPanel]
+(define addNodeButton (new button% [parent leftPanel]
                            [label "Agregar"]
                            [callback (lambda (button event)
                                        (newNodeButtonCallback event))]))
 
-(define resetButton (new button% [parent buttonPanel]
+(define resetButton (new button% [parent leftPanel]
                          [label "Reset"]
                          [callback (lambda (button event)
                                      (resetButtonCallback event))]))
@@ -112,14 +112,14 @@
     Function to write data to a .txt file
     ////////////////////////////
 |#
-(define (writeFile graph edges)
+(define (writeFile graph edges path)
   #|
     ////////////////////////////
     creates the .txt file (if exist, replace it.)
     ////////////////////////////
 |#
 
-  (define output-port (open-output-file "./tmp/temp.txt" #:exists 'replace))
+  (define output-port (open-output-file path #:exists 'replace))
   #|
     ////////////////////////////
     adding the file content
@@ -139,13 +139,13 @@
     Function for reading data from a file
     ////////////////////////////
 |#
-(define (readFile)
+(define (readFile path)
   #|
     (open-input-file "./tmp/temp.txt") -> store the file descriptor (number to refer to an open file in the OS)
     (read (open-input-file "./tmp/temp.txt")) -> read the file, using the file descriptor
     (close-input-port (open-input-file "./tmp/temp.txt")) -> close the open file
   |#
-  (define input-port (open-input-file "./tmp/temp.txt"))
+  (define input-port (open-input-file path))
   (define file-content (read input-port))
   (close-input-port input-port)
   file-content)
@@ -157,23 +157,32 @@
 |#
 
 (define (addNode node)
-  (writeFile (graphCreator (car (readFile)) (string->symbol node)) (cadr (readFile))))
+  (writeFile (graphCreator (car (readFile "./tmp/temp.txt")) (string->symbol node)) (cadr (readFile "./tmp/temp.txt")) "./tmp/temp.txt")
+  (writeFile (appendToList (string->symbol node) (car (readFile "./tmp/temp2.txt"))) (cadr(readFile "./tmp/temp2.txt")) "./tmp/temp2.txt")
+
+  )
 
 (define (addEdge origin destination weight bid)
 
   #|
   bidirectional checkbox marked
 |#
-  (cond ((equal? bid #t) (writeFile (pathCreator (string->symbol origin) (string->symbol destination) (car (readFile)))
-                                    (weightIndex (string->symbol origin) (string->symbol destination) (string->number weight) (cadr (readFile))))
+  (cond ((equal? bid #t) (writeFile (pathCreator (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt")))
+                                    (weightIndex (string->symbol origin) (string->symbol destination) (string->number weight) (cadr (readFile "./tmp/temp.txt")))
+                                    "./tmp/temp.txt"
+                                    )
 
-                         (writeFile (pathCreator (string->symbol destination) (string->symbol origin) (car (readFile)))
-                                    (weightIndex (string->symbol destination) (string->symbol origin) (string->number weight) (cadr (readFile)))))
+                         (writeFile (pathCreator (string->symbol destination) (string->symbol origin) (car (readFile "./tmp/temp.txt")))
+                                    (weightIndex (string->symbol destination) (string->symbol origin) (string->number weight) (cadr (readFile "./tmp/temp.txt")))
+                                    "./tmp/temp.txt"
+                                    ))
         #|
   bidirectional checkbox not marked
 |#
-        (else (writeFile (pathCreator (string->symbol origin) (string->symbol destination) (car (readFile)))
-                         (weightIndex (string->symbol origin) (string->symbol destination) (string->number weight) (cadr (readFile)))))))
+        (else (writeFile (pathCreator (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt")))
+                         (weightIndex (string->symbol origin) (string->symbol destination) (string->number weight) (cadr (readFile "./tmp/temp.txt")))
+                         "./tmp/temp.txt"
+                         ))))
 
 #|
     ////////////////////////////
@@ -181,12 +190,15 @@
     ////////////////////////////
 |#
 (define (reset)
-  (writeFile '() '()))
+  (writeFile '() '() "./tmp/temp.txt")
+  (writeFile '() '((0 0) (5 5) (10 10) (25 56) (34 23) (45 45) (54 63) (100 100) (200 200) (110 110)) "./tmp/temp2.txt")
+  )
 
 (define (search origin destination)
   ;(writeFile (string->symbol origin) (string->symbol destination)))
-  (writeFile (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile)))
-             (findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile))) (cadr (readFile)))
+  (writeFile (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt")))
+             (findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))) (cadr (readFile "./tmp/temp.txt")))
+             "./tmp/temp.txt"
              )
   )
 #|
@@ -194,7 +206,44 @@
     canvas section
     ////////////////////////////
 |#
-(define canvas (new canvas% [parent rightPanel]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define condition #f)
+
+(define graphicButton (new button% [parent leftPanel]
+                           [label "Graficar"]
+                           [callback (lambda (button event)
+                                       (set-condition (not (get-condition)))
+                                       (send canvas refresh))]))
+(define (paint-callback canvas dc)
+  (when condition
+    (shapeNode dc 10 10 "nacho")
+    )
+  )
+
+(define canvas (new canvas% [parent rightPanel]
+                    [style (list 'border)]
+                    [paint-callback paint-callback]
+                    ))
+
+(define (set-condition state)
+  (set! condition state))
+
+(define (get-condition)
+  condition)
+
+
+;METHOD TO DRAW AN INDIVIDUAL NODE
+(define (shapeNode dc xPos yPos nodeName)
+  (send dc set-scale 3 3)
+  (send dc set-font (make-font #:size 3))
+  (send dc set-text-foreground "black")
+  (send dc draw-ellipse xPos yPos 25 25)
+  (send dc draw-text nodeName (+ xPos 1) (+ yPos 9) )
+  )
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #|
     ////////////////////////////
     show the frame

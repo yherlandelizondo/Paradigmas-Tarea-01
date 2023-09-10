@@ -2,6 +2,17 @@
 (require racket/base)
 ;(require "testLogic.rkt")
 
+(define (mReverse list)
+  (reverse-aux list '()))
+(define (reverse-aux list newList)
+  (cond((empty? list) newList)
+       (else
+        (reverse-aux (cdr list) (cons (car list) newList))
+        )
+       ))
+;Testing
+;(mReverse list)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (values node pairs)
   (cond ((null? pairs) '())
@@ -155,5 +166,37 @@
 ;(pathCreator 'A 'E graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(provide pathCreator weightIndex widthFirst graphCreator findMin)
+
+;Return the index of a specific member of the list
+(define (getIndexAux value list cont)
+  (cond((equal? (car list) value) cont)
+       (else
+        (getIndexAux value (cdr list) (+ cont 1)))
+       ))
+
+(define (getIndex value list)
+  (getIndexAux value list 0))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;return the index value in the list
+(define (getValueWithIndexAux index list cont)
+  (cond((equal? cont index) (car list))
+       (else
+        (getValueWithIndexAux index (cdr list) (+ cont 1)))
+       ))
+
+(define (getValueWithIndex index list)
+  (getValueWithIndexAux index list 0))
+;Testing
+;(getValueWithIndex (getIndex 'Alajuela '(Cartago Heredia Alajuela Puntarenas Limon)) '((3, 8) c e k a))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (appendToList value listToAppend)
+  (cons value listToAppend)
+  )
+
+
+(provide pathCreator weightIndex widthFirst graphCreator findMin appendToList mReverse)
 
