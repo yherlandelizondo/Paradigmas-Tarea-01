@@ -197,6 +197,5 @@
   (cons value listToAppend)
   )
 
-
-(provide pathCreator weightIndex widthFirst graphCreator findMin appendToList mReverse)
+(provide pathCreator weightIndex widthFirst graphCreator findMin appendToList mReverse getValueWithIndex getIndex)
 

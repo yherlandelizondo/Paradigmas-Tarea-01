@@ -8,8 +8,8 @@
     ////////////////////////////
 |#
 (define mainWindow (new frame% [label "Wazitico"]
-                        [width 800]
-                        [height 300]))
+                        [width 1300]
+                        [height 600]))
 
 #|
     ////////////////////////////
@@ -36,9 +36,6 @@
 
 (define newNodeField (new text-field% [parent leftPanel]
                           [label "Agregar nodo"]))
-
-(define buttonPanel (new horizontal-panel% [parent leftPanel]
-                         [min-width 300]))
 
 (define addNodeButton (new button% [parent leftPanel]
                            [label "Agregar"]
@@ -217,9 +214,26 @@
                                        (send canvas refresh))]))
 (define (paint-callback canvas dc)
   (when condition
-    (shapeNode dc 10 10 "nacho")
+    (nodePainter (mReverse (car (readFile "./tmp/temp2.txt"))) dc 0)
+    ;(shapeNode dc 10 10 "nacho")
     )
   )
+
+(define (nodePainter nodeList dc index)
+  (cond ((equal? nodeList null) nodeList)
+        (else
+
+         (shapeNode dc  (car (getValueWithIndex (+ index (getIndex (car nodeList) nodeList)) (cadr (readFile "./tmp/temp2.txt"))))
+                    (cadr (getValueWithIndex (+ index (getIndex (car nodeList) nodeList)) (cadr (readFile "./tmp/temp2.txt"))))
+                    (symbol->string (car nodeList)))
+         (nodePainter (cdr nodeList) dc (+ index 1))
+         )
+        )
+  )
+
+;(getValueWithIndex 0 (cadr (readFile "./tmp/temp2.txt")))
+
+(car (getValueWithIndex (getIndex (car (mReverse (car (readFile "./tmp/temp2.txt")))) (mReverse (car (readFile "./tmp/temp2.txt")))) (cadr (readFile "./tmp/temp2.txt"))))
 
 (define canvas (new canvas% [parent rightPanel]
                     [style (list 'border)]
@@ -231,7 +245,6 @@
 
 (define (get-condition)
   condition)
-
 
 ;METHOD TO DRAW AN INDIVIDUAL NODE
 (define (shapeNode dc xPos yPos nodeName)
