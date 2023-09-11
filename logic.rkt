@@ -1,7 +1,7 @@
 #lang racket
 (require racket/base)
-;(require "testLogic.rkt")
 
+;return the reverse of a list
 (define (mReverse list)
   (reverse-aux list '()))
 (define (reverse-aux list newList)
@@ -14,6 +14,9 @@
 ;(mReverse list)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;The value function is used to look up a specific node in a list of pairs
+;and return the list of associations that include that node.
+
 (define (values node pairs)
   (cond ((null? pairs) '())
         ((equal? node (caar pairs))(cons (caar pairs) (cdar pairs)))
@@ -22,13 +25,18 @@
 ;(values node pairs)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;The value function is used to look up a specific node in a list of pairs
+;and return the list of associations that include that node.
+
 (define (associations node list)
   (values node list))
 ;Testing
 ;(associations node list)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;Viene siendo el map
+;The function is used to apply a given function to each item in a list and
+;returns a new list containing the results of applying the function to each item.
+
 (define (applyFunction function list)
   (cond ((null? list)'())
         (else (cons (function (car list)) (applyFunction function (cdr list))))))
@@ -36,10 +44,16 @@
 ;(display(ApplyFunction (lambda (x) (* x x)) '(1 2 3 4 5)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;The function indicates whether or not an element belongs to a list.
+
 (define (member? element list)
   (cond((null? list)#f)
        ((equal? element (car list))#t)
        (else(member? element (cdr list)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Function that determines if the desired solution has been reached.
 
 (define (resolution? end route)
   (equal? end (car route)))
@@ -47,40 +61,45 @@
 ;(resolution? end route)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;Function that returns the immediate neighbors of a node.
 (define (neighbors element graph); vecinos
-  (cond ((equal? (associations element graph) #f)
+  (cond ((equal? (associations element graph) #f) ;non-existent node
          #f)
         (else(cadr (associations element graph)))))
 ;Testing
 ;(neighbors element graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (extender ruta graph)
+;Function that extends a partial path with possible alternative routes.
+(define (extend path graph)
   (apply append
-         (applyFunction (lambda(x)
-                          (cond ((member? x ruta) '())
-                                (else (list (cons x ruta)))))
-                        (neighbors (car ruta) graph))))
+         (applyFunction (lambda(x) ;Checks if the neighbors of the first element in the path belong to the path.
+                          (cond ((member? x path) '()) ;exist
+                                (else (list (cons x path))))) ;doesn't exist
+                        (neighbors (car path) graph))))
 ;Testing
-;(extender ruta graph)
+;(extender path graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (widthFirstAux rutas end graph total)
-  (cond ((null? rutas)
+;Auxiliary function to extend the partial path.
+(define (widthFirstAux paths end graph total)
+  (cond ((null? paths)
          (applyFunction reverse total))
-        ((resolution? end (car rutas))
-         (widthFirstAux (cdr rutas) end graph (cons (car rutas) total)))
+        ((resolution? end (car paths)) ;checks if the first element of paths is the destination
+         (widthFirstAux (cdr paths) end graph (cons (car paths) total))) ;recursive call with the first element added to the total list
         ( else
           (widthFirstAux (append
-                          (cdr rutas)(extender (car rutas) graph)) end graph total))))
+                          (cdr paths)(extend (car paths) graph)) end graph total)))) ; recursive call with the first element removed
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (widthFirst first end graph) ;;Devuelve todas las rutas
+; Main function for breadth-first traversal and search of routes
+; Returns the list with all found routes in (recorridoAux)
+(define (widthFirst first end graph)
   (widthFirstAux (list (list first)) end graph '()))
-;Testing
 ;(widthFirst first end graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
+;Returns the length of a list
 (define (lengthList list)
   (cond ((null? list)0)
         (else (+ 1 (lengthList (cdr list))))))
@@ -88,6 +107,7 @@
 ;(lengthList list)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;Calculate the weight of a route on a graph
 (define (weight listWeights route)
   (cond ((equal? (lengthList route) 1)0)
         (else (+ (caadr (associations (list (car route) (cadr route)) listWeights)) (weight listWeights (cdr route))))))
@@ -95,10 +115,11 @@
 ;(weight listWeights route)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;This function compares all the weights of all possible paths from one point to
+;another on a graph and returns the one with the lowest weight.
 (define (compareWeight listWeights routes)
   (cond ((null? routes) 1000000)
         (else (min (weight listWeights (car routes)) (compareWeight listWeights (cdr routes))))))
-;Testing
 ;(compareWeight listWeights routes)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -121,6 +142,8 @@
 ;Testing
 ;(exist 'C graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Add a Node to a graph
 (define (graphCreator graph newNode)
   (cond((empty? newNode) graph)
        (else
@@ -130,6 +153,9 @@
 ;Testing
 ;(graphCreator graph 'E)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Input:The origin and the end of a conection between nodes and its weight
+;Output: the list of all the weights and its connections with the new connection indexed
 
 (define (weightIndex start end weight wlist)
   (weightIndexAux start end weight wlist '())
@@ -142,22 +168,25 @@
 ;(weightIndex 'A 'D 45 listWeights)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;Input: A node, the node that is connected to the first one, their graph
+;Output: the graph with the new connection between nodes
+
 (define (pathCreator start end graph)
-  (pathCreatorAux start end graph '())
+  (pathCreatorAux start end graph '());cast to the auxiliar function
   )
 (define (pathCreatorAux start end tryList newGraph)
   (cond((empty? tryList) newGraph)
        ;;;;A == A
        ((equal? start (caar tryList)) (indexer start end tryList newGraph))
-       (else ;; aplico cdr
+       (else ;; apply cdr
         (pathCreatorAux start end (cdr tryList) (cons (car tryList) newGraph) )
         )
        ))
 (define (indexer start end tryList newGraph)
-  (cond((null? (cadar tryList))
+  (cond((null? (cadar tryList));checks if the nodes has other connections
         (pathCreatorAux start end (cdr tryList) (cons (list start (cons end (cadar tryList)) ) newGraph))
         )
-       (else
+       (else ;the node has other connections
         (pathCreatorAux start end (cdr tryList) (cons (list start (cons end (cadar tryList))) newGraph))
         )
        )
@@ -166,8 +195,8 @@
 ;(pathCreator 'A 'E graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
 ;Return the index of a specific member of the list
+
 (define (getIndexAux value list cont)
   (cond((equal? (car list) value) cont)
        (else
@@ -176,11 +205,10 @@
 
 (define (getIndex value list)
   (getIndexAux value list 0))
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;return the index value in the list
+
 (define (getValueWithIndexAux index list cont)
   (cond((equal? cont index) (car list))
        (else
@@ -192,6 +220,8 @@
 ;Testing
 ;(getValueWithIndex (getIndex 'Alajuela '(Cartago Heredia Alajuela Puntarenas Limon)) '((3, 8) c e k a))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;funtion to append an element to the list
 
 (define (appendToList value listToAppend)
   (cons value listToAppend)
