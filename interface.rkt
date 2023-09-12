@@ -151,14 +151,12 @@
   (writeFile '() '() "./tmp/temp.txt")
   (writeFile '() '((75 5) (110 5) (145 30) (165 70) (145 110) (110 135) (75 135) (40 110) (20 70) (40 30)) "./tmp/temp2.txt")
   )
-
+(reset)
 (define (search origin destination)
-  (writeFile (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt")))
-             (findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))) (cadr (readFile "./tmp/temp.txt")))
-             "./tmp/temp.txt"
-             )
+  (define allRoutes (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))))
+  (define bestRoute (findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))) (cadr (readFile "./tmp/temp.txt"))))
+  (define searchRoute (list allRoutes bestRoute))
   )
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;canvas section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (paint-callback canvas dc)
@@ -192,6 +190,8 @@
                     (car (getValueWithIndex (getIndex (cadaar connectionList) (mReverse (car (readFile "./tmp/temp2.txt")))) (cadr (readFile "./tmp/temp2.txt"))))
                     ;COORDENADA YNODE2
                     (cadr (getValueWithIndex (getIndex (cadaar connectionList) (mReverse (car (readFile "./tmp/temp2.txt")))) (cadr (readFile "./tmp/temp2.txt"))))
+                    ;color
+                    "black"
                     )
          (linePainter (cdr connectionList) dc (+ index 1))
          )))
@@ -210,14 +210,36 @@
   (send dc draw-text nodeName (+ xPos 3) (+ yPos 9) )
   )
 
-(define (shapeLine dc xNode1 yNode1 xNode2 yNode2)
-  (send dc set-pen "black" 2 'solid)
+(define (shapeLine dc xNode1 yNode1 xNode2 yNode2 color)
+  (define angle (atan (- yNode2 yNode1) (- xNode2 xNode1)))
+  (send dc set-pen color 1 'solid)
   (send dc draw-line(+ xNode1 12.5) (+ yNode1 12.5) (+ xNode2 12.5) (+ yNode2 12.5))
-  (send dc draw-ellipse (- xNode2 1) (+ yNode2 10) 10 9))
 
+  (define arrow-end-x (+ xNode2 12.5 (* 20 (cos angle))))
+  (define arrow-end-y (+ yNode2 12.5 (* 20 (sin angle))))
+  ; Dibujar la flecha como un triángulo en la punta
+
+  (send dc draw-line (+ xNode2 12.5 (* 5 (cos (+ angle (/ pi 6)))))
+        (+ yNode2 12.5 (* 5 (sin (+ angle (/ pi 6)))))
+        arrow-end-x arrow-end-y)
+
+  (send dc draw-line (+ xNode2 12.5 (* 5 (cos (- angle (/ pi 6)))))
+        (+ yNode2 12.5 (* 5 (sin (- angle (/ pi 6)))))
+        arrow-end-x arrow-end-y))
+
+(define (bestRoutePainter bestRouteList nodeList dc)
+  (cond((equal? (length bestRouteList) 1)  0)
+       (else
+        (define coordList (cadr (readFile "./tmp/temp2.txt")))
+        (define node1Coords (getValueWithIndex(getIndex (car bestRouteList) (mReverse nodeList)) coordList))
+        (define node2Coords (getValueWithIndex(getIndex (cadr bestRouteList) (mReverse nodeList)) coordList))
+        (shapeLine dc (car node1Coords) (cadr node1Coords)
+                   (car node2Coords) (cadr node2Coords)
+                   "red")
+        (bestRoutePainter (cdr bestRouteList) nodeList dc)
+        )
+       ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;show the frame;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (send mainWindow show #t)
 
-;(cadaar (cadr (readFile "./tmp/temp.txt")))
-;(getValueWithIndex (getIndex (caaar (cadr (readFile "./tmp/temp.txt"))) (mReverse (car (readFile "./tmp/temp2.txt")))) (cadr (readFile "./tmp/temp2.txt")))
