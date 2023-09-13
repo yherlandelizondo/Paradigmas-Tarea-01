@@ -5,8 +5,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Main Window;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define mainWindow (new frame% [label "Wazitico"]
-                        [width 1300]
-                        [height 600]))
+                        [width 1100]
+                        [height 550]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Window layout section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -67,8 +67,21 @@
 (define searchButton (new button% [parent leftPanel]
                           [label "Buscar"]
                           [callback (lambda (button event)
-                                      (searchButtonCallback event))]))
+                                      (searchButtonCallback event)
+                                      (send canvas refresh)
+                                      (send bestPathWeight set-label (apply string-append (map list->string (caddr (readFile "./tmp/temp2.txt"))) )  ))]))
 
+(define pathTitle (new message% [parent leftPanel]
+                       [label "Posibles rutas"]))
+
+(define allPaths (new message% [parent leftPanel]
+                      [label "  "]))
+
+(define bestPathTitle (new message% [parent leftPanel]
+                           [label "Peso de mejor ruta"]))
+
+(define bestPathWeight (new message% [parent leftPanel]
+                            [label "  "]))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Data collection section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (newNodeButtonCallback event)
@@ -83,13 +96,14 @@
   (send canvas refresh))
 
 (define (searchButtonCallback event)
-  (search (send searchOrigin get-value) (send searchDestination get-value)))
+  (searchPath (send searchOrigin get-value) (send searchDestination get-value))
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Read and write section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Function to write data to a .txt file
-(define (writeFile graph edges path)
+(define (writeFile graph edges aux path)
 
   ;creates the .txt file (if exist, replace it.)
 
@@ -97,7 +111,7 @@
 
   ;adding the file content
 
-  (write (list graph edges) output-port)
+  (write (list graph edges aux) output-port)
 
   ;close the file
   (close-output-port output-port))
@@ -118,9 +132,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Communication with the .txt file section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (addNode node)
-  (writeFile (graphCreator (car (readFile "./tmp/temp.txt")) (string->symbol node)) (cadr (readFile "./tmp/temp.txt")) "./tmp/temp.txt")
-  (writeFile (appendToList (string->symbol node) (car (readFile "./tmp/temp2.txt"))) (cadr(readFile "./tmp/temp2.txt")) "./tmp/temp2.txt")
-
+  (writeFile (graphCreator (car (readFile "./tmp/temp.txt")) (string->symbol node)) (cadr (readFile "./tmp/temp.txt")) '() "./tmp/temp.txt")
+  (writeFile (appendToList (string->symbol node) (car (readFile "./tmp/temp2.txt"))) (cadr(readFile "./tmp/temp2.txt")) '() "./tmp/temp2.txt")
   )
 
 (define (addEdge origin destination weight bid)
@@ -129,11 +142,13 @@
 
   (cond ((equal? bid #t) (writeFile (pathCreator (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt")))
                                     (weightIndex (string->symbol origin) (string->symbol destination) (string->number weight) (cadr (readFile "./tmp/temp.txt")))
+                                    '()
                                     "./tmp/temp.txt"
                                     )
 
                          (writeFile (pathCreator (string->symbol destination) (string->symbol origin) (car (readFile "./tmp/temp.txt")))
                                     (weightIndex (string->symbol destination) (string->symbol origin) (string->number weight) (cadr (readFile "./tmp/temp.txt")))
+                                    '()
                                     "./tmp/temp.txt"
                                     ))
 
@@ -141,42 +156,56 @@
 
         (else (writeFile (pathCreator (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt")))
                          (weightIndex (string->symbol origin) (string->symbol destination) (string->number weight) (cadr (readFile "./tmp/temp.txt")))
+                         '()
                          "./tmp/temp.txt"
                          ))))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Reset and search for shortest parth section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Reset and search for shortest path section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (reset)
-  (writeFile '() '() "./tmp/temp.txt")
-  (writeFile '() '((75 5) (110 5) (145 30) (165 70) (145 110) (110 135) (75 135) (40 110) (20 70) (40 30)) "./tmp/temp2.txt")
+  (writeFile '() '() '()"./tmp/temp.txt")
+  (writeFile '() '((75 5) (110 5) (145 30) (165 70) (145 110) (110 135) (75 135) (40 110) (20 70) (40 30)) '() "./tmp/temp2.txt")
   )
 (reset)
-(define (search origin destination)
-  (define allRoutes (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))))
-  (define bestRoute (findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))) (cadr (readFile "./tmp/temp.txt"))))
-  (define searchRoute (list allRoutes bestRoute))
-  )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;canvas section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (searchPath origin destination)
+  (let ((allRoutes (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))))
+        (bestRoute (findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))) (cadr (readFile "./tmp/temp.txt")))))
+    (writeFile (car (readFile "./tmp/temp2.txt"))
+               (cadr (readFile "./tmp/temp2.txt"))
+               (list allRoutes bestRoute)
+               "./tmp/temp2.txt")))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;canvas section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (paint-callback canvas dc)
   (linePainter (cadr(readFile "./tmp/temp.txt")) dc 0)
   (nodePainter (mReverse (car (readFile "./tmp/temp2.txt"))) dc 0)
-  )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: node section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (cond((null? (caddr (readFile "./tmp/temp2.txt")) )0)
+       (else
+        (bestRoutePainter (car (readFile "./tmp/temp2.txt")) (car (cdaddr (readFile "./tmp/temp2.txt"))) dc)
+        )))
 
+(define canvas (new canvas% [parent rightPanel]
+                    [style (list 'border)]
+                    [paint-callback paint-callback]
+                    ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: node section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (nodePainter nodeList dc index)
   (cond ((equal? nodeList null) nodeList)
         (else
 
          (shapeNode dc  (car (getValueWithIndex (+ index (getIndex (car nodeList) nodeList)) (cadr (readFile "./tmp/temp2.txt"))))
                     (cadr (getValueWithIndex (+ index (getIndex (car nodeList) nodeList)) (cadr (readFile "./tmp/temp2.txt"))))
-                    (symbol->string (car nodeList)))
+                    (symbol->string (car nodeList))
+                    "black")
          (nodePainter (cdr nodeList) dc (+ index 1))
          )
         )
   )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: line section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (linePainter connectionList dc index)
   (cond ((equal? connectionList null) connectionList)
         (else
@@ -196,13 +225,31 @@
          (linePainter (cdr connectionList) dc (+ index 1))
          )))
 
-(define canvas (new canvas% [parent rightPanel]
-                    [style (list 'border)]
-                    [paint-callback paint-callback]
-                    ))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: best route section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (bestRoutePainter nodeList bestRouteList dc)
+  (cond((<= (length bestRouteList) 1)  0)
+       (else
+        (define coordList (cadr (readFile "./tmp/temp2.txt")))
+        (define node1Coords (getValueWithIndex(getIndex (car bestRouteList) (mReverse nodeList)) coordList))
+        (define node2Coords (getValueWithIndex(getIndex (cadr bestRouteList) (mReverse nodeList)) coordList))
+
+        (shapeLine dc (car node1Coords) (cadr node1Coords)
+                   (car node2Coords) (cadr node2Coords)
+                   "red")
+
+        (cond ((null? bestRouteList) 0)
+              (else
+               (bestRoutePainter nodeList (cdr bestRouteList) dc)
+               )
+              )
+        )
+       )
+  )
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;describes the details of the nodes;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (shapeNode dc xPos yPos nodeName)
+(define (shapeNode dc xPos yPos nodeName color)
+  (send dc set-pen color 1 'solid)
   (send dc set-scale 3 3)
   (send dc set-font (make-font #:size 3))
   (send dc set-text-foreground "black")
@@ -210,6 +257,7 @@
   (send dc draw-text nodeName (+ xPos 3) (+ yPos 9) )
   )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;describes the details of the lines;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (shapeLine dc xNode1 yNode1 xNode2 yNode2 color)
   (define angle (atan (- yNode2 yNode1) (- xNode2 xNode1)))
   (send dc set-pen color 1 'solid)
@@ -226,19 +274,6 @@
   (send dc draw-line (+ xNode2 12.5 (* 5 (cos (- angle (/ pi 6)))))
         (+ yNode2 12.5 (* 5 (sin (- angle (/ pi 6)))))
         arrow-end-x arrow-end-y))
-
-(define (bestRoutePainter bestRouteList nodeList dc)
-  (cond((equal? (length bestRouteList) 1)  0)
-       (else
-        (define coordList (cadr (readFile "./tmp/temp2.txt")))
-        (define node1Coords (getValueWithIndex(getIndex (car bestRouteList) (mReverse nodeList)) coordList))
-        (define node2Coords (getValueWithIndex(getIndex (cadr bestRouteList) (mReverse nodeList)) coordList))
-        (shapeLine dc (car node1Coords) (cadr node1Coords)
-                   (car node2Coords) (cadr node2Coords)
-                   "red")
-        (bestRoutePainter (cdr bestRouteList) nodeList dc)
-        )
-       ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;show the frame;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (send mainWindow show #t)

@@ -118,7 +118,7 @@
 ;This function compares all the weights of all possible paths from one point to
 ;another on a graph and returns the one with the lowest weight.
 (define (compareWeight listWeights routes)
-  (cond ((null? routes) 1000000)
+  (cond ((null? routes) exp 10 6)
         (else (min (weight listWeights (car routes)) (compareWeight listWeights (cdr routes))))))
 ;(compareWeight listWeights routes)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -126,6 +126,7 @@
 (define (findMinAux routes allRoutes listWeights)
   (cond((equal? (weight listWeights (car routes)) (compareWeight listWeights allRoutes)) (car routes))
        (else (findMinAux (cdr routes) allRoutes listWeights))))
+
 (define(findMin routes listWeights);;ejemplo abajo
   (findMinAux routes routes listWeights))
 ;Testing
@@ -227,5 +228,5 @@
   (cons value listToAppend)
   )
 
-(provide pathCreator weightIndex widthFirst graphCreator findMin appendToList mReverse getValueWithIndex getIndex)
+(provide pathCreator weightIndex widthFirst graphCreator findMin appendToList mReverse getValueWithIndex getIndex weight)
 
