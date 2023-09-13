@@ -69,19 +69,22 @@
                           [callback (lambda (button event)
                                       (searchButtonCallback event)
                                       (send canvas refresh)
-                                      (send bestPathWeight set-label (apply string-append (map list->string (caddr (readFile "./tmp/temp2.txt"))) )  ))]))
+                                      (send allPaths set-label (format "~a" (caar (caddr (readFile "./tmp/temp2.txt")))))
+
+                                      )]))
 
 (define pathTitle (new message% [parent leftPanel]
                        [label "Posibles rutas"]))
 
 (define allPaths (new message% [parent leftPanel]
-                      [label "  "]))
+                      [label "                                                                           "]))
 
 (define bestPathTitle (new message% [parent leftPanel]
                            [label "Peso de mejor ruta"]))
 
 (define bestPathWeight (new message% [parent leftPanel]
-                            [label "  "]))
+                            [label "          "]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Data collection section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (newNodeButtonCallback event)
