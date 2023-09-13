@@ -69,21 +69,21 @@
                           [callback (lambda (button event)
                                       (searchButtonCallback event)
                                       (send canvas refresh)
-                                      (send allPaths set-label (format "~a" (caar (caddr (readFile "./tmp/temp2.txt")))))
-
+                                      (send allPaths set-label (format "~a" (car (caddr (readFile "./tmp/temp2.txt")))))
+                                      (send bestPathWeight set-label (format "~a" (caaddr(readFile "./tmp/temp.txt"))))
                                       )]))
 
 (define pathTitle (new message% [parent leftPanel]
                        [label "Posibles rutas"]))
 
 (define allPaths (new message% [parent leftPanel]
-                      [label "                                                                           "]))
+                      [label "                                                                   "]))
 
 (define bestPathTitle (new message% [parent leftPanel]
                            [label "Peso de mejor ruta"]))
 
 (define bestPathWeight (new message% [parent leftPanel]
-                            [label "          "]))
+                            [label "                    "]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Data collection section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -134,11 +134,13 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Communication with the .txt file section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;function to add a note to the .txt graph
 (define (addNode node)
   (writeFile (graphCreator (car (readFile "./tmp/temp.txt")) (string->symbol node)) (cadr (readFile "./tmp/temp.txt")) '() "./tmp/temp.txt")
   (writeFile (appendToList (string->symbol node) (car (readFile "./tmp/temp2.txt"))) (cadr(readFile "./tmp/temp2.txt")) '() "./tmp/temp2.txt")
   )
 
+;function to add an edge to the .txt graph
 (define (addEdge origin destination weight bid)
 
   ;bidirectional checkbox marked
@@ -164,23 +166,41 @@
                          ))))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Reset and search for shortest path section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Reset section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;funtion to reset the .txt files
 (define (reset)
   (writeFile '() '() '()"./tmp/temp.txt")
   (writeFile '() '((75 5) (110 5) (145 30) (165 70) (145 110) (110 135) (75 135) (40 110) (20 70) (40 30)) '() "./tmp/temp2.txt")
   )
 (reset)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;search for shortest path section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Function used to search the shortest path between two nodes, this function writes the results to the .txt
 (define (searchPath origin destination)
   (let ((allRoutes (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))))
-        (bestRoute (findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))) (cadr (readFile "./tmp/temp.txt")))))
+        (bestRoute (findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))) (cadr (readFile "./tmp/temp.txt"))))
+
+        (pathWeight (weight (cadr (readFile "./tmp/temp.txt"))
+                            (findMin (widthFirst (string->symbol origin) (string->symbol destination) (car (readFile "./tmp/temp.txt"))) (cadr (readFile "./tmp/temp.txt")))))
+        )
+
     (writeFile (car (readFile "./tmp/temp2.txt"))
                (cadr (readFile "./tmp/temp2.txt"))
                (list allRoutes bestRoute)
-               "./tmp/temp2.txt")))
+               "./tmp/temp2.txt")
+
+    (writeFile (car (readFile "./tmp/temp.txt"))
+               (cadr (readFile "./tmp/temp.txt"))
+               (list pathWeight)
+               "./tmp/temp.txt"))
+  )
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;canvas section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: canvas section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;function to refresh the canvas
 (define (paint-callback canvas dc)
   (linePainter (cadr(readFile "./tmp/temp.txt")) dc 0)
   (nodePainter (mReverse (car (readFile "./tmp/temp2.txt"))) dc 0)
@@ -189,12 +209,15 @@
         (bestRoutePainter (car (readFile "./tmp/temp2.txt")) (car (cdaddr (readFile "./tmp/temp2.txt"))) dc)
         )))
 
+;canvas definition
 (define canvas (new canvas% [parent rightPanel]
                     [style (list 'border)]
                     [paint-callback paint-callback]
                     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: node section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Function to draw each node on the canva
 (define (nodePainter nodeList dc index)
   (cond ((equal? nodeList null) nodeList)
         (else
@@ -209,18 +232,20 @@
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: line section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Function to draw each line on the canva
 (define (linePainter connectionList dc index)
   (cond ((equal? connectionList null) connectionList)
         (else
 
          (shapeLine dc
-                    ;COORDENADA XNODE1
+                    ;COORD XNODE1
                     (car (getValueWithIndex (getIndex (caaar connectionList) (mReverse (car (readFile "./tmp/temp2.txt")))) (cadr (readFile "./tmp/temp2.txt"))))
-                    ;COORDENADA YNODE1
+                    ;COORD YNODE1
                     (cadr (getValueWithIndex (getIndex (caaar connectionList) (mReverse (car (readFile "./tmp/temp2.txt")))) (cadr (readFile "./tmp/temp2.txt"))))
-                    ;COORDENADA XNODE2
+                    ;COORD XNODE2
                     (car (getValueWithIndex (getIndex (cadaar connectionList) (mReverse (car (readFile "./tmp/temp2.txt")))) (cadr (readFile "./tmp/temp2.txt"))))
-                    ;COORDENADA YNODE2
+                    ;COORD YNODE2
                     (cadr (getValueWithIndex (getIndex (cadaar connectionList) (mReverse (car (readFile "./tmp/temp2.txt")))) (cadr (readFile "./tmp/temp2.txt"))))
                     ;color
                     "black"
@@ -229,6 +254,8 @@
          )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: best route section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Function to draw the shortest path on the graph
 (define (bestRoutePainter nodeList bestRouteList dc)
   (cond((<= (length bestRouteList) 1)  0)
        (else

@@ -10,28 +10,25 @@
         (reverse-aux (cdr list) (cons (car list) newList))
         )
        ))
-;Testing
-;(mReverse list)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;The value function is used to look up a specific node in a list of pairs
 ;and return the list of associations that include that node.
 
-(define (values node pairs)
+(define (associations node pairs)
   (cond ((null? pairs) '())
         ((equal? node (caar pairs))(cons (caar pairs) (cdar pairs)))
-        (else (values node (cdr pairs)))))
-;Testing
-;(values node pairs)
+        (else (associations node (cdr pairs)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;The value function is used to look up a specific node in a list of pairs
 ;and return the list of associations that include that node.
 
+#|
 (define (associations node list)
   (values node list))
-;Testing
-;(associations node list)
+|#
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;The function is used to apply a given function to each item in a list and
@@ -40,8 +37,6 @@
 (define (applyFunction function list)
   (cond ((null? list)'())
         (else (cons (function (car list)) (applyFunction function (cdr list))))))
-;Testing
-;(display(ApplyFunction (lambda (x) (* x x)) '(1 2 3 4 5)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;The function indicates whether or not an element belongs to a list.
@@ -50,15 +45,12 @@
   (cond((null? list)#f)
        ((equal? element (car list))#t)
        (else(member? element (cdr list)))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Function that determines if the desired solution has been reached.
 
 (define (resolution? end route)
   (equal? end (car route)))
-;Testing
-;(resolution? end route)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Function that returns the immediate neighbors of a node.
@@ -66,8 +58,6 @@
   (cond ((equal? (associations element graph) #f) ;non-existent node
          #f)
         (else(cadr (associations element graph)))))
-;Testing
-;(neighbors element graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Function that extends a partial path with possible alternative routes.
@@ -77,8 +67,6 @@
                           (cond ((member? x path) '()) ;exist
                                 (else (list (cons x path))))) ;doesn't exist
                         (neighbors (car path) graph))))
-;Testing
-;(extender path graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Auxiliary function to extend the partial path.
@@ -96,23 +84,18 @@
 ; Returns the list with all found routes in (recorridoAux)
 (define (widthFirst first end graph)
   (widthFirstAux (list (list first)) end graph '()))
-;(widthFirst first end graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Returns the length of a list
 (define (lengthList list)
   (cond ((null? list)0)
         (else (+ 1 (lengthList (cdr list))))))
-;Testing
-;(lengthList list)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Calculate the weight of a route on a graph
 (define (weight listWeights route)
   (cond ((equal? (lengthList route) 1)0)
         (else (+ (caadr (associations (list (car route) (cadr route)) listWeights)) (weight listWeights (cdr route))))))
-;Testing
-;(weight listWeights route)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;This function compares all the weights of all possible paths from one point to
@@ -120,28 +103,15 @@
 (define (compareWeight listWeights routes)
   (cond ((null? routes) exp 10 6)
         (else (min (weight listWeights (car routes)) (compareWeight listWeights (cdr routes))))))
-;(compareWeight listWeights routes)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (findMinAux routes allRoutes listWeights)
   (cond((equal? (weight listWeights (car routes)) (compareWeight listWeights allRoutes)) (car routes))
        (else (findMinAux (cdr routes) allRoutes listWeights))))
 
-(define(findMin routes listWeights);;ejemplo abajo
+;function to search the shortest path
+(define(findMin routes listWeights)
   (findMinAux routes routes listWeights))
-;Testing
-;(displayln (findMin (widthFirst 'a 'f graph) listWeights))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;The node exist in the graph?
-(define (exist node graph)
-  (cond((null? graph) #f)
-       ((equal? node (caar graph))#t)
-       (else
-        (exist node (cdr graph))
-        )))
-;Testing
-;(exist 'C graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Add a Node to a graph
@@ -151,8 +121,6 @@
         (reverse (cons (list newNode '()) (reverse graph) ))
         )
        ))
-;Testing
-;(graphCreator graph 'E)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Input:The origin and the end of a conection between nodes and its weight
@@ -165,8 +133,6 @@
 (define (weightIndexAux start end weight wlist blank)
   (reverse (cons (list (list start end) (cons weight blank)) (reverse wlist)))
   )
-;Testing
-;(weightIndex 'A 'D 45 listWeights)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Input: A node, the node that is connected to the first one, their graph
@@ -192,8 +158,6 @@
         )
        )
   )
-;Testing
-;(pathCreator 'A 'E graph)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Return the index of a specific member of the list
@@ -218,8 +182,6 @@
 
 (define (getValueWithIndex index list)
   (getValueWithIndexAux index list 0))
-;Testing
-;(getValueWithIndex (getIndex 'Alajuela '(Cartago Heredia Alajuela Puntarenas Limon)) '((3, 8) c e k a))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;funtion to append an element to the list
